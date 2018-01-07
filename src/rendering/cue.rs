@@ -17,43 +17,10 @@ pub fn render_cue(pool: &Pool, args: &RenderArgs, c: &Context, gl: &mut GlGraphi
     line(color, 3.0, line_coordinates, c.transform, gl);
 }
 
-enum VerticalOrientation {
-    Top,
-    Bottom
-}
-
-
-enum HorizontalOrientation {
-    Left,
-    Right
-}
-
-
-fn find_orientation(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D) -> (VerticalOrientation, HorizontalOrientation) {
-    println!("mouse: {:?}, cueball: {:?}", mouse_position, ball_position);
-
-    let horizontal_orientation = if mouse_position.x > ball_position.x {
-        HorizontalOrientation::Right
-    } else {
-        HorizontalOrientation::Left
-    };
-
-    let vertical_orientation = if mouse_position.y > ball_position.y {
-        VerticalOrientation::Top
-    } else {
-        VerticalOrientation::Bottom
-    };
-
-    (vertical_orientation, horizontal_orientation)
-}
-
 fn find_intersections(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, radius: f64) -> [f64; 2] {
     //https://math.stackexchange.com/questions/228841/how-do-i-calculate-the-intersections-of-a-straight-line-and-a-circle
     //https://cscheng.info/2016/06/09/calculate-circle-line-intersection-with-javascript-and-p5js.html
-    //(x - h)2 + (y - k)2 = r2
-    //(x - h)2 + (mx + c - k)2 = r2
-    //c = -545
-    // k = 144
+
     let m = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
     let c = ((m * mouse_position.x) - (mouse_position.y)) * -1.0;
     let h = ball_position.x;
@@ -63,50 +30,44 @@ fn find_intersections(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoin
     let b = (-h * 2.0) + (m * (c - k)) * 2.0; //accounts for x*h + x * h and m * c-k + m * c-k
     let c = (h * h) + (c - k).powi(2) - (radius * radius); //accounts for the rest of the elements
 
-    let x_pos = (-b + ((b*b) - (4.0*a*c)).sqrt()) / (2.0*a);
-    let x_neg = (-b - ((b*b) - (4.0*a*c)).sqrt()) / (2.0*a);
-
+    let x_pos = (-b + ((b * b) - (4.0 * a * c)).sqrt()) / (2.0 * a);
+    let x_neg = (-b - ((b * b) - (4.0 * a * c)).sqrt()) / (2.0 * a);
 
     [x_pos, x_neg]
+}
+
+fn find_appropriate_intersection(x_points: &[f64; 2], mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D) -> ScreenPoint2D {
+    let m = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
+    let c = ((m * mouse_position.x) - (mouse_position.y)) * -1.0;
+
+    let y = |x: f64| {
+        (m * x) + c
+    };
+
+    let screen_points: Vec<Complex> = x_points
+        .iter()
+        .map(|x| Complex { x: *x, y: y(*x) })
+        .collect();
+
+    let closest_to_mouse = mouse_position
+        .as_complex()
+        .find_closest(screen_points.as_slice());
+
+    ScreenPoint2D {
+        x: closest_to_mouse.x,
+        y: closest_to_mouse.y
+    }
 }
 
 fn cue_line(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, args: &RenderArgs, radius: f64) -> [f64; 4] {
     let intersections_close = find_intersections(&mouse_position, &ball_position, radius * 3.0);
 
     let cue_size = ((args.height as f64 + args.width as f64) / 8.0); //15%
-
-    println!("cue size: {}", cue_size);
-
     let intersections_far = find_intersections(&mouse_position, &ball_position, (radius * 3.0) + cue_size);
 
-    let m = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
-    let c = ((m * mouse_position.x) - (mouse_position.y)) * -1.0;
+    let cue_tip = find_appropriate_intersection(&intersections_close, &mouse_position, &ball_position);
+    let cue_end = find_appropriate_intersection(&intersections_far, &mouse_position, &ball_position);
 
-
-    let y = |x: f64| {
-        (m * x) + c
-    };
-
-    let to_screen_point = |x: &f64| {
-        ScreenPoint2D { x:*x, y: y(*x) }
-    };
-
-    let screen_points_close : Vec<Complex> = intersections_close
-        .iter()
-        .map(&to_screen_point)
-        .map(|p| p.as_complex())
-        .collect();
-
-    let chosen_point_close = mouse_position.as_complex().find_closest(screen_points_close.as_slice());
-
-    let screen_points_far : Vec<Complex> = intersections_far
-        .iter()
-        .map(&to_screen_point)
-        .map(|p| p.as_complex())
-        .collect();
-
-    let chosen_point_far = mouse_position.as_complex().find_closest(screen_points_far.as_slice());
-
-    [chosen_point_close.x, chosen_point_close.y, chosen_point_far.x, chosen_point_far.y]
+    [cue_tip.x, cue_tip.y, cue_end.x, cue_end.y]
 }
 
