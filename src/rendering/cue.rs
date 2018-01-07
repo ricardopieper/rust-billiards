@@ -3,6 +3,8 @@ use opengl_graphics::GlGraphics;
 use graphics::*;
 use piston::input::*;
 use rendering::drawing::rgb;
+use utils;
+use entities::Line;
 
 pub fn render_cue(pool: &Pool, args: &RenderArgs, c: &Context, gl: &mut GlGraphics) {
     //draw a line from the ball center to mouse pos
@@ -17,36 +19,12 @@ pub fn render_cue(pool: &Pool, args: &RenderArgs, c: &Context, gl: &mut GlGraphi
     line(color, 3.0, line_coordinates, c.transform, gl);
 }
 
-fn find_intersections(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, radius: f64) -> [f64; 2] {
-    //https://math.stackexchange.com/questions/228841/how-do-i-calculate-the-intersections-of-a-straight-line-and-a-circle
-    //https://cscheng.info/2016/06/09/calculate-circle-line-intersection-with-javascript-and-p5js.html
 
-    let m = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
-    let c = ((m * mouse_position.x) - (mouse_position.y)) * -1.0;
-    let h = ball_position.x;
-    let k = ball_position.y;
-
-    let a = 1.0 + (m * m); //accounts for (x)^2 and mx^2
-    let b = (-h * 2.0) + (m * (c - k)) * 2.0; //accounts for x*h + x * h and m * c-k + m * c-k
-    let c = (h * h) + (c - k).powi(2) - (radius * radius); //accounts for the rest of the elements
-
-    let x_pos = (-b + ((b * b) - (4.0 * a * c)).sqrt()) / (2.0 * a);
-    let x_neg = (-b - ((b * b) - (4.0 * a * c)).sqrt()) / (2.0 * a);
-
-    [x_pos, x_neg]
-}
-
-fn find_appropriate_intersection(x_points: &[f64; 2], mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D) -> ScreenPoint2D {
-    let m = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
-    let c = ((m * mouse_position.x) - (mouse_position.y)) * -1.0;
-
-    let y = |x: f64| {
-        (m * x) + c
-    };
+fn get_cue_extremity(x_points: &[f64; 2], line: &Line, mouse_position: &ScreenPoint2D) -> ScreenPoint2D {
 
     let screen_points: Vec<Complex> = x_points
         .iter()
-        .map(|x| Complex { x: *x, y: y(*x) })
+        .map(|x| Complex { x: *x, y: line.y(*x) })
         .collect();
 
     let closest_to_mouse = mouse_position
@@ -60,13 +38,22 @@ fn find_appropriate_intersection(x_points: &[f64; 2], mouse_position: &ScreenPoi
 }
 
 fn cue_line(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, args: &RenderArgs, radius: f64) -> [f64; 4] {
-    let intersections_close = find_intersections(&mouse_position, &ball_position, radius * 3.0);
+
+    let slope = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
+    let y_intercept = ((slope * mouse_position.x) - (mouse_position.y)) * -1.0;
+
+    let line = Line { y_intercept, slope };
 
     let cue_size = ((args.height as f64 + args.width as f64) / 8.0); //15%
-    let intersections_far = find_intersections(&mouse_position, &ball_position, (radius * 3.0) + cue_size);
 
-    let cue_tip = find_appropriate_intersection(&intersections_close, &mouse_position, &ball_position);
-    let cue_end = find_appropriate_intersection(&intersections_far, &mouse_position, &ball_position);
+    let cue_tip_pivot = Circle { position: ball_position.as_complex(), radius: radius * 3.0 };
+    let cue_end_pivot = Circle { position: ball_position.as_complex(), radius: (radius * 3.0) + cue_size };
+
+    let intersections_tip = utils::math::intersections(&cue_tip_pivot, &line);
+    let intersections_end = utils::math::intersections(&cue_end_pivot, &line);
+
+    let cue_tip = get_cue_extremity(&intersections_tip, &line, &mouse_position);
+    let cue_end = get_cue_extremity(&intersections_end, &line, &mouse_position);
 
     [cue_tip.x, cue_tip.y, cue_end.x, cue_end.y]
 }

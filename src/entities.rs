@@ -47,6 +47,12 @@ pub struct ScreenPoint2D {
     pub y: f64
 }
 
+pub struct Line {
+    pub slope: f64,
+    pub y_intercept: f64
+}
+
+
 impl Complex {
     pub fn scale(&self, width: f64, height: f64) -> ScreenPoint2D {
         ScreenPoint2D {
@@ -85,5 +91,11 @@ impl Complex {
 impl ScreenPoint2D {
     pub fn as_complex(&self) -> Complex {
         Complex { x: self.x, y: self.y }
+    }
+}
+
+impl Line {
+    pub fn y(&self, x: f64) -> f64 {
+        (self.slope * x) + self.y_intercept
     }
 }
