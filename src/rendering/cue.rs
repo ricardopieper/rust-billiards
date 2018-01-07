@@ -44,7 +44,7 @@ fn cue_line(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, args:
 
     let line = Line { y_intercept, slope };
 
-    let cue_size = ((args.height as f64 + args.width as f64) / 8.0); //15%
+    let cue_size = ((args.height as f64 + args.width as f64) / 8.0);
 
     let cue_tip_pivot = Circle { position: ball_position.as_complex(), radius: radius * 3.0 };
     let cue_end_pivot = Circle { position: ball_position.as_complex(), radius: (radius * 3.0) + cue_size };
