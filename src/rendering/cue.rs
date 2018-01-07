@@ -68,12 +68,16 @@ fn find_intersections(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoin
 
 
     [x_pos, x_neg]
-
 }
 
 fn cue_line(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, args: &RenderArgs, radius: f64) -> [f64; 4] {
-    let intersections_close = find_intersections(&mouse_position, &ball_position, radius * 7.0);
-    let intersections_far = find_intersections(&mouse_position, &ball_position, (radius * 7.0) + 150.0);
+    let intersections_close = find_intersections(&mouse_position, &ball_position, radius * 3.0);
+
+    let cue_size = ((args.height as f64 + args.width as f64) / 8.0); //15%
+
+    println!("cue size: {}", cue_size);
+
+    let intersections_far = find_intersections(&mouse_position, &ball_position, (radius * 3.0) + cue_size);
 
     let m = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
     let c = ((m * mouse_position.x) - (mouse_position.y)) * -1.0;
