@@ -1,0 +1,5 @@
+/target/
+**/*.rs.bk
+billiards.iml
+Cargo.lock
+.idea/**
