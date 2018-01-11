@@ -2,6 +2,7 @@ mod entities;
 mod game;
 mod rendering;
 mod utils;
+mod complex;
 
 extern crate piston;
 extern crate graphics;
@@ -16,6 +17,7 @@ use opengl_graphics::{GlGraphics, OpenGL};
 
 use entities::*;
 use rendering::pool::*;
+use complex::*;
 
 fn main() {
     let opengl = OpenGL::V3_2;
