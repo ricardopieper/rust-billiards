@@ -84,11 +84,8 @@ fn main() {
         if let Some(pos) = e.mouse_cursor_args() {
             pool.set_mouse_pos(pos);
         }
-        if let Some(click) = e.press_args() {
-            match click {
-                Mouse(MouseButton::Left) => pool.stun_shot(),
-                _ => {}
-            }
+        if let Some(Mouse(MouseButton::Left)) = e.press_args() {
+            pool.stun_shot()
         }
     }
 }

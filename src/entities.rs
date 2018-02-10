@@ -62,8 +62,11 @@ impl Pool {
         let mouse_pos = &self.mouse_pos.canonical(self.window_width, self.window_height);
 
         let vector = CueLine::get_shot_vector(mouse_pos, ball_pos);
+        println!("Shot Vector: {:?}", vector);
 
         self.cueball.speed = vector.divide(100.0);
+        println!("Ball speed: {:?}", self.cueball.speed);
+
 
         let time = SystemTime::now().duration_since(UNIX_EPOCH);
 

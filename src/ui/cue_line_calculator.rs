@@ -50,7 +50,7 @@ impl CueLine {
             Point2D::new(x, y)
         };
 
-        println!("Shot Vector: {:?}", target);
+
 
         //ball to mouse vector
         Vector2D::new(target.x - ball_pos.x, target.y - ball_pos.y).normalize()
