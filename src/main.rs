@@ -3,6 +3,7 @@ mod game;
 mod rendering;
 mod utils;
 mod complex;
+mod ui;
 
 extern crate piston;
 extern crate graphics;
@@ -23,7 +24,7 @@ fn main() {
     let opengl = OpenGL::V3_2;
     let mut window: Window = WindowSettings::new(
         "Rust Billiards",
-        [640, 480]
+        [600, 600]
     )
         .opengl(opengl)
         .exit_on_esc(true)
@@ -33,24 +34,24 @@ fn main() {
 
     let ball = Ball {
         number: 8,
-        position: Point2D { x: 0.1, y: 0.3 },
-        speed: Vector2D { x: 0.0, y: 0.0 },
+        position: Point2D::new(0.1, 0.3),
+        speed: Point2D::new(0.0, 0.0),
         radius: 0.03
     };
 
     let cueball = Ball {
         number: 0,
-        position: Point2D { x: 0.5, y: 0.5 },
-        speed: Vector2D { x: 0.0, y: 0.0 },
+        position: Point2D::new(0.5, 0.5),
+        speed: Vector2D::new(0.0, 0.0),
         radius: 0.03
     };
 
-    let pocket_tl = Pocket { position: Point2D { x: 0.0, y: 0.0}, radius: 0.05 };
-    let pocket_tm = Pocket { position: Point2D { x: 0.5, y: 0.0}, radius: 0.05 };
-    let pocket_tr = Pocket { position: Point2D { x: 1.0, y: 0.0}, radius: 0.05 };
-    let pocket_bl = Pocket { position: Point2D { x: 0.0, y: 1.0}, radius: 0.05 };
-    let pocket_bm = Pocket { position: Point2D { x: 0.5, y: 1.0}, radius: 0.05 };
-    let pocket_br = Pocket { position: Point2D { x: 1.0, y: 1.0}, radius: 0.05 };
+    let pocket_tl = Pocket { position: Point2D::new(0.0, 0.0), radius: 0.05 };
+    let pocket_tm = Pocket { position: Point2D::new(0.5, 0.0), radius: 0.05 };
+    let pocket_tr = Pocket { position: Point2D::new(1.0, 0.0), radius: 0.05 };
+    let pocket_bl = Pocket { position: Point2D::new(0.0, 1.0), radius: 0.05 };
+    let pocket_bm = Pocket { position: Point2D::new(0.5, 1.0), radius: 0.05 };
+    let pocket_br = Pocket { position: Point2D::new(1.0, 1.0), radius: 0.05 };
 
 
     let mut pool = Pool {
@@ -63,18 +64,27 @@ fn main() {
             pocket_br
         ],
         balls: vec![ball],
-        mouse_pos: ScreenPoint2D {x: 354.0, y: 408.0},
-        cueball };
+        mouse_pos: ScreenPoint2D::new(354.0, 408.0),
+        cueball,
+        window_width: 0.0,
+        window_height: 0.0
+    };
 
     let mut gl = GlGraphics::new(opengl);
 
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
+        if let Some(u) = e.update_args() {
+            pool.update();
+        }
         if let Some(r) = e.render_args() {
-            render(&pool, r.width, r.height, &r, &mut gl)
+            render(&mut pool,&r, &mut gl)
         }
         if let Some(pos) = e.mouse_cursor_args() {
             pool.set_mouse_pos(pos);
+        }
+        if let Some(click) = e.press_args() {
+            pool.stun_shot();
         }
     }
 }

@@ -1,72 +1,26 @@
 use entities::*;
 use opengl_graphics::GlGraphics;
 use graphics::*;
-use piston::input::*;
 use rendering::drawing::rgb;
-use utils;
-use entities::Line;
-use complex::*;
+use ui::cue;
+use ui::CueLine;
 
-pub fn render_cue(pool: &Pool, args: &RenderArgs, c: &Context, gl: &mut GlGraphics) {
-    //draw a line from the ball center to mouse pos
-
-    let mouse_position = &pool.mouse_pos;
-
-    let radius = pool.cueball.radius * ((args.width + args.height) as f64 / 2.0);
-
-    let line_coordinates = cue_line(&pool.mouse_pos, &pool.cueball.position.scale_to_args(args), args, radius);
-
+pub fn render_cue(pool: &Pool, c: &Context, gl: &mut GlGraphics) {
     let color = rgb(255.0, 0.0, 0.0, 1.0);
-    line(color, 3.0, line_coordinates, c.transform, gl);
+
+    let ref mouse_pos = pool.mouse_pos;
+    let ref ball_pos = pool.cueball.position.to_screen_point(pool.window_width, pool.window_height);
+    let distance_from_cueball = (pool.cueball.radius * 3.0) * pool.window_width;
+    let window_width = pool.window_width;
+    let window_height = pool.window_height;
+
+    let cue_line = cue::get_cue_line(
+       mouse_pos, ball_pos, distance_from_cueball, window_width, window_height
+    );
+
+    line(color, 3.0, to_f64_coordinates(cue_line), c.transform, gl);
 }
 
-
-fn get_cue_extremity(x_points: &[f64; 2], line: &Line, mouse_position: &ScreenPoint2D) -> ScreenPoint2D {
-    let screen_points: Vec<ScreenPoint2D> = x_points
-        .iter()
-        .map(|x| ScreenPoint2D { x: *x, y: line.y(*x) })
-        .collect();
-
-    let closest_to_mouse = mouse_position.find_closest(screen_points.as_slice());
-
-    ScreenPoint2D {
-        x: closest_to_mouse.x,
-        y: closest_to_mouse.y
-    }
-}
-
-//@TODO: refactor 4 args
-
-fn cue_line(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, args: &RenderArgs, radius: f64) -> [f64; 4] {
-    if mouse_position.x == ball_position.x {
-        return get_aligned_cue_line(mouse_position, ball_position, args, radius);
-    } else {
-        return calculate_cue_line(mouse_position, ball_position, args, radius);
-    }
-}
-
-fn get_aligned_cue_line(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, args: &RenderArgs, radius: f64) -> [f64; 4] {
-    let cue_size = (args.height as f64 + args.width as f64) / 8.0;
-    let signal = if mouse_position.is_above(ball_position) { 1.0 } else { -1.0 };
-
-    [mouse_position.x,
-        ball_position.y + (radius * 3.0) * signal,
-        mouse_position.x,
-        ball_position.y + ((radius * 3.0) + cue_size) * signal]
-}
-
-fn calculate_cue_line(mouse_position: &ScreenPoint2D, ball_position: &ScreenPoint2D, args: &RenderArgs, radius: f64) -> [f64; 4] {
-    let cue_size = (args.height as f64 + args.width as f64) / 8.0;
-    let slope = (ball_position.y - mouse_position.y) / (ball_position.x - mouse_position.x);
-    let y_intercept = ((slope * mouse_position.x) - (mouse_position.y)) * -1.0;
-
-    let line = Line { y_intercept, slope };
-
-    let intersections_tip = utils::math::intersections(ball_position, radius * 3.0, &line);
-    let intersections_end = utils::math::intersections(ball_position, (radius * 3.0) + cue_size, &line);
-
-    let cue_tip = get_cue_extremity(&intersections_tip, &line, &mouse_position);
-    let cue_end = get_cue_extremity(&intersections_end, &line, &mouse_position);
-
-    return [cue_tip.x, cue_tip.y, cue_end.x, cue_end.y];
+fn to_f64_coordinates(cue_line: CueLine) -> [f64; 4] {
+    [cue_line.tip.x, cue_line.tip.y, cue_line.grip.x, cue_line.grip.y]
 }

@@ -8,13 +8,15 @@ use rendering::ball::render_cueball;
 use rendering::cue::render_cue;
 use rendering::drawing::*;
 
-pub fn render(pool: &Pool, window_width: u32, window_height: u32, args: &RenderArgs, gl: &mut GlGraphics) {
+pub fn render(pool: &mut Pool, args: &RenderArgs, gl: &mut GlGraphics) {
+    pool.window_width = args.width as f64;
+    pool.window_height = args.height as f64;
     gl.draw(args.viewport(), |c, gl| {
-        render_pool(gl);
-        render_pockets(&pool.pockets, &args, &c, gl);
-        render_balls(&pool.balls, &args, &c, gl);
-        render_cueball(&pool, &args, &c, gl);
-        render_cue(&pool, &args, &c, gl);
+      //  render_pool(gl);
+        render_pockets(&pool,&c, gl);
+        render_balls(&pool, &c, gl);
+        render_cueball(&pool, &c, gl);
+        render_cue(&pool, &c, gl);
     });
 }
 
