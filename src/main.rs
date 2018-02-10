@@ -15,6 +15,7 @@ use piston::event_loop::*;
 use piston::input::*;
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
+use piston::input::Button::Mouse;
 
 use entities::*;
 use rendering::pool::*;
@@ -24,7 +25,7 @@ fn main() {
     let opengl = OpenGL::V3_2;
     let mut window: Window = WindowSettings::new(
         "Rust Billiards",
-        [600, 600]
+        [600, 300]
     )
         .opengl(opengl)
         .exit_on_esc(true)
@@ -84,7 +85,10 @@ fn main() {
             pool.set_mouse_pos(pos);
         }
         if let Some(click) = e.press_args() {
-            pool.stun_shot();
+            match click {
+                Mouse(MouseButton::Left) => pool.stun_shot(),
+                _ => {}
+            }
         }
     }
 }

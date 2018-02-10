@@ -42,31 +42,18 @@ impl CueLine {
         let y_intercept = math::calculate_y_intercept(mouse_pos, slope);
         let x = if mouse_pos.is_at_left(ball_pos) { 0.0 } else { 1.0 };
 
-        let target = Point2D::new(x, slope * x + y_intercept);
+        let y = slope * x + y_intercept;
 
-        println!("{:?}", target);
+        let target = if f64::is_nan(y) {
+            Point2D::new(x, 0.0)
+        } else {
+            Point2D::new(x, y)
+        };
+
+        println!("Shot Vector: {:?}", target);
 
         //ball to mouse vector
         Vector2D::new(target.x - ball_pos.x, target.y - ball_pos.y).normalize()
-    }
-
-
-    fn sin(angle_vertex: &Point2D, opposite_vertex: &Point2D, adjacent_vertex: &Point2D) -> f64 {
-
-        let hypothenuse = angle_vertex.distance_between(opposite_vertex).abs();
-        let opposite = adjacent_vertex.distance_between(opposite_vertex).abs();
-
-        //sin = opposite / hypotenuse
-        opposite / hypothenuse
-    }
-
-    fn cos(angle_vertex: &Point2D, opposite_vertex: &Point2D, adjacent_vertex: &Point2D) -> f64 {
-
-        let hypothenuse = angle_vertex.distance_between(opposite_vertex).abs();
-        let adjacent = angle_vertex.distance_between(adjacent_vertex).abs();
-
-        //cos = adjacent / hypotenuse
-        adjacent / hypothenuse
     }
 
     fn get_cue_length(params: &CueLineParams) -> f64 {

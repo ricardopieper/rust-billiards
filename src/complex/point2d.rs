@@ -40,6 +40,9 @@ impl Point2D {
         Vector2D::new(self.x * mult, self.y * mult)
     }
 
+    pub fn is_zero(&self) -> bool {
+        self.x() == 0.0 && self.y() == 0.0
+    }
 }
 
 impl Complex for Point2D {
