@@ -32,21 +32,32 @@ fn render_pool(pool: &mut Pool, c: &Context, gl: &mut GlGraphics) {
     let ratio = pool.window_width / pool.window_height;
 
 
-    if ratio < 2.0 {
-        let bars_y = 2.0 - ratio;
+    if ratio < 2.0 { //less wide than desired
+        //forces a 2:1 ratio
+        pool.window_rect.horizontal_size = pool.window_width;
+        pool.window_rect.vertical_size = pool.window_width / 2.0;
 
-        pool.window_rect.origin.y = (bars_y * pool.window_height) / 4.0;
-        pool.window_rect.vertical_size = (pool.window_width / 2.0);
-
-        let rect = [0.0,
-                            pool.window_rect.origin.y,
-                            pool.window_width,
-                            pool.window_rect.vertical_size];
-
-        rectangle([1.0; 4], rect, c.transform, gl);
+        //calculates origin displaced from 0,0
+        pool.window_rect.origin.y = (pool.window_height - pool.window_rect.vertical_size) / 2.0;
+        pool.window_rect.origin.x = 0.0;
     }
 
+    if ratio > 2.0 { //way too wide
+        pool.window_rect.vertical_size = pool.window_height;
+        pool.window_rect.horizontal_size = pool.window_height * 2.0;
 
+        //calculates origin displaced from 0,0
+        pool.window_rect.origin.x = (pool.window_width -  pool.window_rect.horizontal_size) / 2.0;
+        pool.window_rect.origin.y = 0.0;
+    }
+
+    let rect = [
+        pool.window_rect.origin.x,
+        pool.window_rect.origin.y,
+        pool.window_rect.horizontal_size,
+        pool.window_rect.vertical_size];
+
+    rectangle([1.0; 4], rect, c.transform, gl);
 
     clear(rgb(50.0, 200.0, 50.0, 1.0), gl);
 }
