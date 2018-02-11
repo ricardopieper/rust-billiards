@@ -1,13 +1,14 @@
-use complex::Point2D;
+use complex::ScreenPoint2D;
 
-struct Rectangle {
-    origin: Point2D,
-    vertical_size: f64,
-    horizontal_size: f64
+#[derive(Debug)]
+pub struct ScreenRectangle {
+    pub origin: ScreenPoint2D,
+    pub vertical_size: f64,
+    pub horizontal_size: f64
 }
 
-impl Rectangle {
-    pub fn is_inside(&self, point: &Point2D) -> bool {
+impl ScreenRectangle {
+    pub fn is_inside(&self, point: &ScreenPoint2D) -> bool {
         point.y >= self.up()
             && point.y <= self.down()
             && point.x >= self.left()

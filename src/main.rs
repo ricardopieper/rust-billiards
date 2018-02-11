@@ -4,6 +4,7 @@ mod rendering;
 mod utils;
 mod complex;
 mod ui;
+mod geometry;
 
 extern crate piston;
 extern crate graphics;
@@ -20,6 +21,7 @@ use piston::input::Button::Mouse;
 use entities::*;
 use rendering::pool::*;
 use complex::*;
+use geometry::*;
 
 fn main() {
     let opengl = OpenGL::V3_2;
@@ -68,7 +70,12 @@ fn main() {
         mouse_pos: ScreenPoint2D::new(354.0, 408.0),
         cueball,
         window_width: 0.0,
-        window_height: 0.0
+        window_height: 0.0,
+        window_rect: ScreenRectangle {
+            origin: ScreenPoint2D::new(0.0, 0.0),
+            vertical_size: 0.0,
+            horizontal_size: 0.0
+        },
     };
 
     let mut gl = GlGraphics::new(opengl);

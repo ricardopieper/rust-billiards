@@ -23,6 +23,7 @@ impl Point2D {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 
+    /// Normalizes a vector/point to 1
     pub fn normalize(&self) -> Vector2D {
         let m = self.magnitude();
 

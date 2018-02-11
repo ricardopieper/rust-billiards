@@ -1,6 +1,11 @@
 use complex::*;
 use ui::*;
 use std::time::{SystemTime, UNIX_EPOCH};
+use geometry::*;
+
+pub const MIN_SPEED : f64 =  0.00018;
+pub const DECELERATION : f64 =  0.995;
+pub const DECELERATION_IMPACT : f64 =  0.95;
 
 pub struct Pool {
     pub cueball: Ball,
@@ -9,6 +14,7 @@ pub struct Pool {
     pub mouse_pos: ScreenPoint2D,
     pub window_width: f64,
     pub window_height: f64,
+    pub window_rect: ScreenRectangle
 }
 
 impl Pool {
@@ -18,34 +24,38 @@ impl Pool {
             self.cueball.position.x += self.cueball.speed.x;
             self.cueball.position.y += self.cueball.speed.y;
 
-            let ups = 120.0;
-            let five_sec = 5.0 * ups;
-
-            let speed_loss = (1.0 / five_sec);
-
-            if self.cueball.speed.magnitude().abs() <= speed_loss {
+            if self.cueball.speed.magnitude().abs() <= MIN_SPEED {
                 self.cueball.speed.x = 0.0;
                 self.cueball.speed.y = 0.0;
-
-                let time = SystemTime::now().duration_since(UNIX_EPOCH);
-
-                match time {
-                    Ok(n) => println!("stopped at {:?}", n.as_secs()),
-                    Err(_) => println!("fail")
-                }
-
             } else {
-                self.cueball.speed = self.cueball.speed.multiply(1.0 - speed_loss);
+                self.cueball.speed = self.cueball.speed.multiply(DECELERATION);
             }
-            if self.cueball.position.x <= 0.0 || self.cueball.position.x >= 1.0 {
+
+            if self.cueball.position.x <= 0.0 {
+                self.cueball.position.x = 0.0;
                 self.cueball.speed.x *= -1.0;
             }
 
-            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 1.0 {
+            if self.cueball.position.x >= 1.0 {
+                self.cueball.position.x = 1.0;
+                self.cueball.speed.x *= -1.0;
+            }
+
+            if self.cueball.position.y <= 0.0 {
+                self.cueball.position.y = 0.0;
                 self.cueball.speed.y *= -1.0;
             }
-        }
 
+            if self.cueball.position.y >= 1.0 {
+                self.cueball.position.y = 1.0;
+                self.cueball.speed.y *= -1.0;
+            }
+
+            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 1.0 ||
+                self.cueball.position.x <= 0.0 || self.cueball.position.x >= 1.0 {
+               self.cueball.speed = self.cueball.speed.multiply(DECELERATION_IMPACT);
+            }
+        }
     }
 
     pub fn set_mouse_pos(&mut self, mouse_pos: [f64; 2]) {
@@ -59,21 +69,15 @@ impl Pool {
         let ball_pos = &self
             .cueball.position;
 
-        let mouse_pos = &self.mouse_pos.canonical(self.window_width, self.window_height);
+        let mouse_pos = &self.mouse_pos.to_point2d(self.window_width, self.window_height);
 
         let vector = CueLine::get_shot_vector(mouse_pos, ball_pos);
-        println!("Shot Vector: {:?}", vector);
 
-        self.cueball.speed = vector.divide(100.0);
-        println!("Ball speed: {:?}", self.cueball.speed);
+        let ups = 120.0;
+        let time_sec = 0.5;
+        let ratio = ups * time_sec;
 
-
-        let time = SystemTime::now().duration_since(UNIX_EPOCH);
-
-        match time {
-            Ok(n) => println!("Shot at {:?}", n.as_secs()),
-            Err(_) => println!("fail")
-        }
+        self.cueball.speed = vector.divide(ratio);
     }
 }
 
