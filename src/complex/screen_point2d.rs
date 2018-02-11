@@ -1,6 +1,7 @@
 use complex::complex::*;
 use complex::Point2D;
 
+/// A point in the screen
 #[derive(Debug)]
 pub struct ScreenPoint2D {
     pub x: f64,
@@ -9,7 +10,7 @@ pub struct ScreenPoint2D {
 
 impl ScreenPoint2D {
     pub fn new(x: f64, y: f64) -> ScreenPoint2D { ScreenPoint2D { x, y } }
-    pub fn canonical(&self, width: f64, height: f64) -> Point2D {
+    pub fn to_point2d(&self, width: f64, height: f64) -> Point2D {
         Point2D::new(self.x / width, self.y / height)
     }
 }

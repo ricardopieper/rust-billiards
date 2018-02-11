@@ -1,5 +1,6 @@
 use complex::*;
 
+/// A type that represents a space between (0,0) and (1,1)
 #[derive(Debug)]
 pub struct Point2D {
     pub x: f64,
@@ -11,12 +12,8 @@ pub type Vector2D = Point2D;
 impl Point2D {
     pub fn new(x: f64, y: f64) -> Point2D { Point2D { x, y } }
 
-    pub fn scale(&self, width: f64, height: f64) -> Point2D {
-        Point2D::new(self.x * width, self.y * height)
-    }
-
     pub fn to_screen_point(&self, width: f64, height: f64) -> ScreenPoint2D {
-        let point = self.scale(width as f64, height as f64);
+        let point = Point2D::new(self.x * width, self.y * height);
         point.as_screen_point()
     }
 
