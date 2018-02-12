@@ -1,5 +1,4 @@
 mod entities;
-mod game;
 mod rendering;
 mod utils;
 mod complex;
