@@ -53,8 +53,7 @@ fn render_pool(pool: &mut Pool, args: &RenderArgs, c: &Context, gl: &mut GlGraph
         pool.play_area.origin.y = (window_height - pool.play_area.height) / 2.0;
         pool.play_area.origin.x = 0.0;
     }
-
-    if ratio > 2.0 { //way too wide
+    else if ratio > 2.0 { //way too wide
         pool.play_area.height = window_height;
         pool.play_area.width = window_height * 2.0;
 
@@ -62,6 +61,13 @@ fn render_pool(pool: &mut Pool, args: &RenderArgs, c: &Context, gl: &mut GlGraph
         pool.play_area.origin.x = (window_width - pool.play_area.width) / 2.0;
         pool.play_area.origin.y = 0.0;
     }
+    else {
+        pool.play_area.origin.x = 0.0;
+        pool.play_area.origin.y = 0.0;
+        pool.play_area.width = window_width;
+        pool.play_area.height = window_height;
+    }
+
 
     let rect = [
         pool.play_area.origin.x,
