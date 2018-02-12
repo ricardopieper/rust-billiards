@@ -10,7 +10,7 @@ pub fn render_cue(pool: &Pool, c: &Context, gl: &mut GlGraphics) {
 
     let ref mouse_pos = pool.mouse_pos;
     let ref ball_pos = pool.cueball.position.to_screen_point_from_rect(&pool.play_area);
-    let distance_from_cueball = (pool.cueball.radius * 3.0) * pool.play_area.parent.width;
+    let distance_from_cueball = (pool.cueball.radius * 3.0) * pool.play_area.width;
 
     let cue_line = cue::get_cue_line(
        mouse_pos, ball_pos, distance_from_cueball, &pool.play_area
