@@ -88,8 +88,6 @@ impl CueLine {
 
         let y_intercept = math::calculate_y_intercept(&mouse_position, slope);
 
-        println!("y_intercept: {}", y_intercept);
-
         let line = Line { y_intercept, slope };
 
         let distance = params.tip_distance_from_cueball;

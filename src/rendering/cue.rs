@@ -12,8 +12,6 @@ pub fn render_cue(pool: &Pool, c: &Context, gl: &mut GlGraphics) {
     let mouse_position = &pool.mouse_table_position();
     let ball_position = &pool.cueball.position;
 
-    println!("{:?}", mouse_position);
-
     let tip_distance_from_cueball = (pool.cueball.radius * 3.0) * pool.play_area.width;
 
     let cue_line = cue::get_cue_line(
