@@ -37,22 +37,7 @@ impl CueLine {
     }
 
     pub fn get_shot_vector(mouse_pos: &Point2D, ball_pos: &Point2D) -> Vector2D {
-        let slope = math::calculate_slope(
-            ball_pos,
-            mouse_pos);
-
-        let y_intercept = math::calculate_y_intercept(mouse_pos, slope);
-        let x = if mouse_pos.is_at_left(ball_pos) { 0.0 } else { 1.0 };
-
-        let y = slope * x + y_intercept;
-
-        let target = if f64::is_nan(y) {
-            Point2D::new(x, 0.0)
-        } else {
-            Point2D::new(x, y)
-        };
-
-        Vector2D::new(target.x - ball_pos.x, target.y - ball_pos.y).normalize()
+        Vector2D::new(mouse_pos.x - ball_pos.x, mouse_pos.y - ball_pos.y).normalize()
     }
 
     fn get_cue_length(params: &CueLineParams) -> f64 {
