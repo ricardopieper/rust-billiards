@@ -2,11 +2,14 @@ use complex::*;
 use utils::math;
 use entities::*;
 use geometry::*;
+
+#[derive(Debug)]
 pub struct CueLine {
     pub tip: ScreenPoint2D,
     pub grip: ScreenPoint2D
 }
 
+#[derive(Debug)]
 pub struct CueLineParams<'a> {
     pub mouse_position: &'a Point2D,
     pub ball_position: &'a Point2D,
@@ -74,29 +77,28 @@ impl CueLine {
     }
 
     fn calculate_cue_line(params: &CueLineParams) -> [f64; 4] {
-        let mouse_position = params.mouse_position;
-        let ball_position = params.ball_position;
+        let mouse_position = params.mouse_position.to_screen_point_relative(params.table);
+        let ball_position = params.ball_position.to_screen_point_relative(params.table);
 
         let cue_size = CueLine::get_cue_length(params);
 
         let slope = math::calculate_slope(
-            ball_position,
-            mouse_position);
+            &ball_position,
+            &mouse_position);
 
-        let y_intercept = math::calculate_y_intercept(mouse_position, slope);
+        let y_intercept = math::calculate_y_intercept(&mouse_position, slope);
+
+        println!("y_intercept: {}", y_intercept);
 
         let line = Line { y_intercept, slope };
 
         let distance = params.tip_distance_from_cueball;
 
-        let intersections_tip = math::intersections(ball_position, distance, &line);
-        let intersections_end = math::intersections(ball_position, distance + cue_size, &line);
+        let intersections_tip = math::intersections(&ball_position, distance, &line);
+        let intersections_end = math::intersections(&ball_position, distance + cue_size, &line);
 
-
-        let mouse_pos_table = mouse_position.to_screen_point_from_rect(params.table);
-
-        let cue_tip = CueLine::get_cue_extremity(&intersections_tip, &line, &mouse_pos_table);
-        let cue_end = CueLine::get_cue_extremity(&intersections_end, &line, &mouse_pos_table);
+        let cue_tip = CueLine::get_cue_extremity(&intersections_tip, &line, &mouse_position);
+        let cue_end = CueLine::get_cue_extremity(&intersections_end, &line, &mouse_position);
 
         return [cue_tip.x, cue_tip.y, cue_end.x, cue_end.y];
     }

@@ -10,15 +10,15 @@ pub fn render_cue(pool: &Pool, c: &Context, gl: &mut GlGraphics) {
     let color = rgb(255.0, 0.0, 0.0, 1.0);
 
     let mouse_position = &pool.mouse_table_position();
+    let ball_position = &pool.cueball.position;
 
-    //let mut ball_position = pool.cueball.position.to_screen_point_from_rect(&pool.play_area);
-    //ball_position.y *= 2.0;
+    println!("{:?}", mouse_position);
 
     let tip_distance_from_cueball = (pool.cueball.radius * 3.0) * pool.play_area.width;
 
     let cue_line = cue::get_cue_line(
        mouse_position,
-       &pool.cueball.position,
+       ball_position,
        tip_distance_from_cueball,
        &pool.play_area
     );

@@ -27,14 +27,6 @@ impl Point2D {
         point.as_screen_point()
     }
 
-    pub fn to_screen_point_from_rect(&self, rect: &ScreenRectangle) -> ScreenPoint2D {
-        let x = (self.x * rect.width) + rect.origin.x;
-        let y = ((self.y * rect.height) + rect.origin.y);
-
-        let point = Point2D::new(x, y);
-        point.as_screen_point()
-    }
-
     pub fn as_screen_point(&self) -> ScreenPoint2D { ScreenPoint2D::new(self.x, self.y) }
 
     pub fn magnitude(&self) -> f64 {

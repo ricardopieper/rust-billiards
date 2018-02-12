@@ -13,5 +13,9 @@ pub fn get_cue_line(mouse_position: &Point2D,
         table
     };
 
-    CueLine::calculate(&cue_line_params)
+    let line = CueLine::calculate(&cue_line_params);
+
+    println!("{:?}", line);
+
+    line
 }
