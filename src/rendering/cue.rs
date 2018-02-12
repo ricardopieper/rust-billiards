@@ -9,12 +9,18 @@ use utils::math::*;
 pub fn render_cue(pool: &Pool, c: &Context, gl: &mut GlGraphics) {
     let color = rgb(255.0, 0.0, 0.0, 1.0);
 
-    let ref mouse_pos = pool.mouse_pos;
-    let ref ball_pos = pool.cueball.position.to_screen_point_from_rect(&pool.play_area);
-    let distance_from_cueball = (pool.cueball.radius * 3.0) * pool.play_area.width;
+    let mouse_position = &pool.mouse_table_position();
+
+    //let mut ball_position = pool.cueball.position.to_screen_point_from_rect(&pool.play_area);
+    //ball_position.y *= 2.0;
+
+    let tip_distance_from_cueball = (pool.cueball.radius * 3.0) * pool.play_area.width;
 
     let cue_line = cue::get_cue_line(
-       mouse_pos, ball_pos, distance_from_cueball, &pool.play_area
+       mouse_position,
+       &pool.cueball.position,
+       tip_distance_from_cueball,
+       &pool.play_area
     );
 
     line(color, 3.0, to_f64_coordinates(cue_line), c.transform, gl);

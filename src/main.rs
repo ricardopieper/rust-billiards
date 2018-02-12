@@ -43,7 +43,7 @@ fn main() {
 
     let cueball = Ball {
         number: 0,
-        position: Point2D::new(0.5, 0.5),
+        position: Point2D::new(0.5, 0.25),
         speed: Vector2D::new(0.0, 0.0),
         radius: 0.03
     };
@@ -51,9 +51,9 @@ fn main() {
     let pocket_tl = Pocket { position: Point2D::new(0.0, 0.0), radius: 0.05 };
     let pocket_tm = Pocket { position: Point2D::new(0.5, 0.0), radius: 0.05 };
     let pocket_tr = Pocket { position: Point2D::new(1.0, 0.0), radius: 0.05 };
-    let pocket_bl = Pocket { position: Point2D::new(0.0, 1.0), radius: 0.05 };
-    let pocket_bm = Pocket { position: Point2D::new(0.5, 1.0), radius: 0.05 };
-    let pocket_br = Pocket { position: Point2D::new(1.0, 1.0), radius: 0.05 };
+    let pocket_bl = Pocket { position: Point2D::new(0.0, 0.5), radius: 0.05 };
+    let pocket_bm = Pocket { position: Point2D::new(0.5, 0.5), radius: 0.05 };
+    let pocket_br = Pocket { position: Point2D::new(1.0, 0.5), radius: 0.05 };
 
 
     let mut pool = Pool {

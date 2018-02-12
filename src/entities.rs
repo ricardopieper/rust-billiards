@@ -3,9 +3,10 @@ use ui::*;
 use std::time::{SystemTime, UNIX_EPOCH};
 use geometry::*;
 
-pub const MIN_SPEED : f64 =  0.00018;
-pub const DECELERATION : f64 =  0.995;
-pub const DECELERATION_IMPACT : f64 =  0.95;
+pub const MIN_SPEED: f64 = 0.00018;
+pub const DECELERATION: f64 = 0.992;
+pub const DECELERATION_IMPACT: f64 = 0.95;
+pub const SPEED_RATIO: f64 = 30.0;
 
 pub struct Pool {
     pub cueball: Ball,
@@ -17,7 +18,6 @@ pub struct Pool {
 
 impl Pool {
     pub fn update(&mut self) {
-
         if !self.cueball.is_stopped() {
             self.cueball.position.x += self.cueball.speed.x;
             self.cueball.position.y += self.cueball.speed.y;
@@ -45,16 +45,24 @@ impl Pool {
             }
 
             //only half of the space is usable
-            if self.cueball.position.y >= 1.0 {
-                self.cueball.position.y = 1.0;
+            if self.cueball.position.y >= 0.5 {
+                self.cueball.position.y = 0.5;
                 self.cueball.speed.y *= -1.0;
             }
 
-            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 1.0 ||
+            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 0.5 ||
                 self.cueball.position.x <= 0.0 || self.cueball.position.x >= 1.0 {
-               self.cueball.speed = self.cueball.speed.multiply(DECELERATION_IMPACT);
+                self.cueball.speed = self.cueball.speed.multiply(DECELERATION_IMPACT);
             }
         }
+    }
+
+    pub fn mouse_table_position(&self) -> Point2D {
+        let mouse_pos_relative = ScreenPoint2D {
+            x: self.mouse_pos.x - self.play_area.origin.x,
+            y: (self.mouse_pos.y - self.play_area.origin.y) / 2.0,
+        };
+        mouse_pos_relative.to_point2d(self.play_area.width, self.play_area.height)
     }
 
     pub fn set_mouse_pos(&mut self, mouse_pos: [f64; 2]) {
@@ -65,23 +73,13 @@ impl Pool {
     }
 
     pub fn stun_shot(&mut self) {
-
         let ball_pos = &self.cueball.position;
 
-        let mouse_pos_relative = ScreenPoint2D {
-            x: self.mouse_pos.x - self.play_area.origin.x,
-            y: self.mouse_pos.y - self.play_area.origin.y,
-        };
-
-        let mouse_pos_2d = mouse_pos_relative.to_point2d(self.play_area.width, self.play_area.height);
+        let mouse_pos_2d = self.mouse_table_position();
 
         let vector = CueLine::get_shot_vector(&mouse_pos_2d, ball_pos);
 
-        let ups = 120.0;
-        let time_sec = 0.5;
-        let ratio = ups * time_sec;
-
-        self.cueball.speed = vector.divide(ratio);
+        self.cueball.speed = vector.divide(SPEED_RATIO);
     }
 }
 

@@ -8,8 +8,8 @@ pub struct CueLine {
 }
 
 pub struct CueLineParams<'a> {
-    pub mouse_position: &'a ScreenPoint2D,
-    pub ball_position: &'a ScreenPoint2D,
+    pub mouse_position: &'a Point2D,
+    pub ball_position: &'a Point2D,
     pub table: &'a ScreenRectangle,
     pub tip_distance_from_cueball: f64
 }
@@ -49,7 +49,6 @@ impl CueLine {
             Point2D::new(x, y)
         };
 
-        //ball to mouse vector
         Vector2D::new(target.x - ball_pos.x, target.y - ball_pos.y).normalize()
     }
 
@@ -93,8 +92,11 @@ impl CueLine {
         let intersections_tip = math::intersections(ball_position, distance, &line);
         let intersections_end = math::intersections(ball_position, distance + cue_size, &line);
 
-        let cue_tip = CueLine::get_cue_extremity(&intersections_tip, &line, mouse_position);
-        let cue_end = CueLine::get_cue_extremity(&intersections_end, &line, mouse_position);
+
+        let mouse_pos_table = mouse_position.to_screen_point_from_rect(params.table);
+
+        let cue_tip = CueLine::get_cue_extremity(&intersections_tip, &line, &mouse_pos_table);
+        let cue_end = CueLine::get_cue_extremity(&intersections_end, &line, &mouse_pos_table);
 
         return [cue_tip.x, cue_tip.y, cue_end.x, cue_end.y];
     }

@@ -2,8 +2,8 @@ use complex::*;
 use ui::cue_line_calculator::*;
 use geometry::*;
 
-pub fn get_cue_line(mouse_position: &ScreenPoint2D,
-                    ball_position: &ScreenPoint2D,
+pub fn get_cue_line(mouse_position: &Point2D,
+                    ball_position: &Point2D,
                     tip_distance_from_cueball: f64,
                     table: &ScreenRectangle) -> CueLine {
 

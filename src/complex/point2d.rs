@@ -13,13 +13,13 @@ impl Point2D {
     pub fn new(x: f64, y: f64) -> Point2D { Point2D { x, y } }
 
     pub fn to_screen_point(&self, width: f64, height: f64) -> ScreenPoint2D {
-        let point = Point2D::new(self.x * width, self.y * height);
+        let point = Point2D::new(self.x * width, (self.y * height));
         point.as_screen_point()
     }
 
     pub fn to_screen_point_from_rect(&self, rect: &ScreenRectangle) -> ScreenPoint2D {
         let x = (self.x * rect.width) + rect.origin.x;
-        let y = (self.y * rect.height) + rect.origin.y;
+        let y = ((self.y * rect.height) + rect.origin.y);
 
         let point = Point2D::new(x, y);
         point.as_screen_point()
