@@ -45,12 +45,12 @@ impl Pool {
             }
 
             //only half of the space is usable
-            if self.cueball.position.y >= 0.5 {
-                self.cueball.position.y = 0.5;
+            if self.cueball.position.y >= 1.0 {
+                self.cueball.position.y = 1.0;
                 self.cueball.speed.y *= -1.0;
             }
 
-            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 0.5 ||
+            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 1.0 ||
                 self.cueball.position.x <= 0.0 || self.cueball.position.x >= 1.0 {
                self.cueball.speed = self.cueball.speed.multiply(DECELERATION_IMPACT);
             }
