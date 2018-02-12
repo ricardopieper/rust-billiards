@@ -61,12 +61,12 @@ impl CueLine {
 
     fn get_straight_vertical_cue_line(params: &CueLineParams) -> [f64; 4] {
 
-        let mouse_pos = params.mouse_position;
-        let ball_pos = params.ball_position;
+        let mouse_pos = params.mouse_position.to_screen_point_relative(params.table);
+        let ball_pos = params.ball_position.to_screen_point_relative(params.table);
 
         let cue_size = CueLine::get_cue_length(params);
 
-        let signal = if mouse_pos.is_above(ball_pos) { -1.0 } else { 1.0 };
+        let signal = if mouse_pos.is_above(&ball_pos) { -1.0 } else { 1.0 };
 
         let distance = params.tip_distance_from_cueball;
 
