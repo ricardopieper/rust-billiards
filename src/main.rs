@@ -69,12 +69,15 @@ fn main() {
         balls: vec![ball],
         mouse_pos: ScreenPoint2D::new(354.0, 408.0),
         cueball,
-        window_width: 0.0,
-        window_height: 0.0,
-        window_rect: ScreenRectangle {
+        play_area: ScreenRectangle {
             origin: ScreenPoint2D::new(0.0, 0.0),
-            vertical_size: 0.0,
-            horizontal_size: 0.0
+            height: 0.0,
+            width: 0.0,
+            parent: ScreenRectangleParent {
+                origin: ScreenPoint2D::new(0.0, 0.0),
+                height: 0.0,
+                width: 0.0,
+            }
         },
     };
 

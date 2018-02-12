@@ -12,9 +12,7 @@ pub struct Pool {
     pub balls: Vec<Ball>,
     pub pockets: Vec<Pocket>,
     pub mouse_pos: ScreenPoint2D,
-    pub window_width: f64,
-    pub window_height: f64,
-    pub window_rect: ScreenRectangle
+    pub play_area: ScreenRectangle
 }
 
 impl Pool {
@@ -46,12 +44,13 @@ impl Pool {
                 self.cueball.speed.y *= -1.0;
             }
 
-            if self.cueball.position.y >= 1.0 {
-                self.cueball.position.y = 1.0;
+            //only half of the space is usable
+            if self.cueball.position.y >= 0.5 {
+                self.cueball.position.y = 0.5;
                 self.cueball.speed.y *= -1.0;
             }
 
-            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 1.0 ||
+            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 0.5 ||
                 self.cueball.position.x <= 0.0 || self.cueball.position.x >= 1.0 {
                self.cueball.speed = self.cueball.speed.multiply(DECELERATION_IMPACT);
             }
@@ -69,7 +68,8 @@ impl Pool {
         let ball_pos = &self
             .cueball.position;
 
-        let mouse_pos = &self.mouse_pos.to_point2d(self.window_width, self.window_height);
+        let mouse_pos = &self.mouse_pos.to_point2d(self.play_area.parent.width,
+                                                             self.play_area.parent.height);
 
         let vector = CueLine::get_shot_vector(mouse_pos, ball_pos);
 
@@ -78,6 +78,8 @@ impl Pool {
         let ratio = ups * time_sec;
 
         self.cueball.speed = vector.divide(ratio);
+
+
     }
 }
 

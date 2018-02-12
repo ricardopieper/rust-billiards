@@ -3,8 +3,15 @@ use complex::ScreenPoint2D;
 #[derive(Debug)]
 pub struct ScreenRectangle {
     pub origin: ScreenPoint2D,
-    pub vertical_size: f64,
-    pub horizontal_size: f64
+    pub height: f64,
+    pub width: f64,
+    pub parent: ScreenRectangleParent
+}
+#[derive(Debug)]
+pub struct ScreenRectangleParent {
+    pub origin: ScreenPoint2D,
+    pub height: f64,
+    pub width: f64
 }
 
 impl ScreenRectangle {
@@ -19,12 +26,16 @@ impl ScreenRectangle {
         self.origin.x
     }
     pub fn right(&self) -> f64 {
-        self.origin.x + self.horizontal_size
+        self.origin.x + self.width
     }
     pub fn up(&self) -> f64 {
         self.origin.y
     }
     pub fn down(&self) -> f64 {
-        self.origin.y + self.vertical_size
+        self.origin.y + self.height
+    }
+
+    pub fn aspect(&self) -> f64 {
+        (self.width + self.height) / 2.0
     }
 }

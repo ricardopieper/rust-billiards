@@ -1,5 +1,5 @@
 use complex::*;
-
+use geometry::*;
 /// A type that represents a space between (0,0) and (1,1)
 #[derive(Debug)]
 pub struct Point2D {
@@ -14,6 +14,14 @@ impl Point2D {
 
     pub fn to_screen_point(&self, width: f64, height: f64) -> ScreenPoint2D {
         let point = Point2D::new(self.x * width, self.y * height);
+        point.as_screen_point()
+    }
+
+    pub fn to_screen_point_from_rect(&self, rect: &ScreenRectangle) -> ScreenPoint2D {
+        let x = (self.x * rect.width) + rect.origin.x;
+        let y = (self.y * rect.height) + rect.origin.y;
+
+        let point = Point2D::new(x, y);
         point.as_screen_point()
     }
 

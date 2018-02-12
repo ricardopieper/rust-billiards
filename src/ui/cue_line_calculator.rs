@@ -1,7 +1,7 @@
 use complex::*;
 use utils::math;
 use entities::*;
-
+use geometry::*;
 pub struct CueLine {
     pub tip: ScreenPoint2D,
     pub grip: ScreenPoint2D
@@ -10,9 +10,8 @@ pub struct CueLine {
 pub struct CueLineParams<'a> {
     pub mouse_position: &'a ScreenPoint2D,
     pub ball_position: &'a ScreenPoint2D,
-    pub window_width: f64,
-    pub window_height: f64,
-    pub tip_distance_from_cueball_center: f64
+    pub table: &'a ScreenRectangle,
+    pub tip_distance_from_cueball: f64
 }
 
 impl CueLine {
@@ -57,7 +56,7 @@ impl CueLine {
     }
 
     fn get_cue_length(params: &CueLineParams) -> f64 {
-        params.window_height as f64 / 4.0
+        params.table.aspect() / 4.0
     }
 
     fn get_straight_vertical_cue_line(params: &CueLineParams) -> [f64; 4] {
@@ -69,7 +68,7 @@ impl CueLine {
 
         let signal = if mouse_pos.is_above(ball_pos) { -1.0 } else { 1.0 };
 
-        let distance = params.tip_distance_from_cueball_center;
+        let distance = params.tip_distance_from_cueball;
 
         [mouse_pos.x,
             ball_pos.y + (distance * signal),
@@ -91,7 +90,7 @@ impl CueLine {
 
         let line = Line { y_intercept, slope };
 
-        let distance = params.tip_distance_from_cueball_center;
+        let distance = params.tip_distance_from_cueball;
 
         let intersections_tip = math::intersections(ball_position, distance, &line);
         let intersections_end = math::intersections(ball_position, distance + cue_size, &line);
