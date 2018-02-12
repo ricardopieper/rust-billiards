@@ -4,6 +4,7 @@ use graphics::*;
 use rendering::drawing::rgb;
 use ui::cue;
 use ui::CueLine;
+use utils::math::*;
 
 pub fn render_cue(pool: &Pool, c: &Context, gl: &mut GlGraphics) {
     let color = rgb(255.0, 0.0, 0.0, 1.0);

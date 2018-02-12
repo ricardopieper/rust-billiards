@@ -65,21 +65,23 @@ impl Pool {
     }
 
     pub fn stun_shot(&mut self) {
-        let ball_pos = &self
-            .cueball.position;
 
-        let mouse_pos = &self.mouse_pos.to_point2d(self.play_area.parent.width,
-                                                             self.play_area.parent.height);
+        let ball_pos = &self.cueball.position;
 
-        let vector = CueLine::get_shot_vector(mouse_pos, ball_pos);
+        let mouse_pos_relative = ScreenPoint2D {
+            x: self.mouse_pos.x - self.play_area.origin.x,
+            y: self.mouse_pos.y - self.play_area.origin.y,
+        };
+
+        let mouse_pos_2d = mouse_pos_relative.to_point2d(self.play_area.width, self.play_area.height);
+
+        let vector = CueLine::get_shot_vector(&mouse_pos_2d, ball_pos);
 
         let ups = 120.0;
         let time_sec = 0.5;
         let ratio = ups * time_sec;
 
         self.cueball.speed = vector.divide(ratio);
-
-
     }
 }
 

@@ -2,10 +2,9 @@ use entities::*;
 use opengl_graphics::GlGraphics;
 use graphics::*;
 use piston::input::*;
-use rendering::pocket::render_pockets;
-use rendering::ball::render_balls;
-use rendering::ball::render_cueball;
-use rendering::cue::render_cue;
+use rendering::pocket::*;
+use rendering::ball::*;
+use rendering::cue::*;
 use rendering::drawing::*;
 use geometry::*;
 use complex::*;
@@ -67,7 +66,6 @@ fn render_pool(pool: &mut Pool, args: &RenderArgs, c: &Context, gl: &mut GlGraph
         pool.play_area.width = window_width;
         pool.play_area.height = window_height;
     }
-
 
     let rect = [
         pool.play_area.origin.x,
