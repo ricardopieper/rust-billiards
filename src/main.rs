@@ -29,31 +29,94 @@ fn main() {
         [600, 300]
     )
         .opengl(opengl)
+        .samples(4)
         .exit_on_esc(true)
         .build()
         .unwrap();
 
-
     let ball = Ball {
-        number: 8,
-        position: Point2D::new(0.1, 0.3),
-        speed: Point2D::new(0.0, 0.0),
-        radius: 0.03
+        number: 1,
+        position: Point2D::new(0.25, 0.027),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball2 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.075),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball3 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.125),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball4 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.175),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball5 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.225),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball6 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.275),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball7 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.325),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball8 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.375),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball9 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.425),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
+    };
+
+    let ball10 = Ball {
+        number: 1,
+        position: Point2D::new(0.25, 0.470),
+        speed: Point2D::new(0.1, 0.0),
+        radius: 0.05
     };
 
     let cueball = Ball {
         number: 0,
-        position: Point2D::new(0.5, 0.25),
+        position: Point2D::new(0.8, 0.25),
         speed: Vector2D::new(0.0, 0.0),
-        radius: 0.03
+        radius: 0.05
     };
 
-    let pocket_tl = Pocket { position: Point2D::new(0.0, 0.0), radius: 0.05 };
-    let pocket_tm = Pocket { position: Point2D::new(0.5, 0.0), radius: 0.05 };
-    let pocket_tr = Pocket { position: Point2D::new(1.0, 0.0), radius: 0.05 };
-    let pocket_bl = Pocket { position: Point2D::new(0.0, 0.5), radius: 0.05 };
-    let pocket_bm = Pocket { position: Point2D::new(0.5, 0.5), radius: 0.05 };
-    let pocket_br = Pocket { position: Point2D::new(1.0, 0.5), radius: 0.05 };
+    let pocket_tl = Pocket { position: Point2D::new(0.0, 0.0), radius: 0.1 };
+    let pocket_tm = Pocket { position: Point2D::new(0.5, 0.0), radius: 0.1 };
+    let pocket_tr = Pocket { position: Point2D::new(1.0, 0.0), radius: 0.1 };
+    let pocket_bl = Pocket { position: Point2D::new(0.0, 0.5), radius: 0.1 };
+    let pocket_bm = Pocket { position: Point2D::new(0.5, 0.5), radius: 0.1 };
+    let pocket_br = Pocket { position: Point2D::new(1.0, 0.5), radius: 0.1 };
 
 
     let mut pool = Pool {
@@ -65,7 +128,7 @@ fn main() {
             pocket_bm,
             pocket_br
         ],
-        balls: vec![ball],
+        balls: vec![ball, ball2, ball3, ball4, ball5, ball6, ball7, ball8, ball9, ball10],
         mouse_pos: ScreenPoint2D::new(354.0, 408.0),
         cueball,
         play_area: ScreenRectangle {

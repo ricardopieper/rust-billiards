@@ -35,7 +35,7 @@ impl ScreenRectangle {
         self.origin.y + self.height
     }
 
-    pub fn aspect(&self) -> f64 {
-        (self.width + self.height) / 2.0
+    pub fn aspect_for_circles(&self) -> f64 {
+        self.width / 2.0
     }
 }

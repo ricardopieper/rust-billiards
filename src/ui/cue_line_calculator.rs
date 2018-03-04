@@ -41,7 +41,7 @@ impl CueLine {
     }
 
     fn get_cue_length(params: &CueLineParams) -> f64 {
-        params.table.aspect() / 4.0
+        params.table.aspect_for_circles() / 4.0
     }
 
     fn get_straight_vertical_cue_line(params: &CueLineParams) -> [f64; 4] {
@@ -96,4 +96,22 @@ impl CueLine {
 
         ScreenPoint2D::new(closest_to_mouse.x, closest_to_mouse.y)
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

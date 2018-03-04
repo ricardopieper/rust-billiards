@@ -1,6 +1,6 @@
 use complex::*;
 use ui::*;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::*;
 use geometry::*;
 
 pub const MIN_SPEED: f64 = 0.00018;
@@ -18,45 +18,75 @@ pub struct Pool {
 
 impl Pool {
     pub fn update(&mut self) {
-        if !self.cueball.is_stopped() {
-            self.cueball.position.x += self.cueball.speed.x;
-            self.cueball.position.y += self.cueball.speed.y;
 
-            if self.cueball.speed.magnitude().abs() <= MIN_SPEED {
-                self.cueball.speed.x = 0.0;
-                self.cueball.speed.y = 0.0;
+        let balls_impact_check = self.balls.clone();
+
+        Pool::move_ball(&mut self.cueball);
+        Pool::impact_against_wall(&mut self.cueball);
+        Pool::impact_against_other_balls(&mut self.cueball, balls_impact_check.as_slice());
+
+        for ball in &mut self.balls {
+
+            let all_except_self = balls_impact_check.iter()
+                .filter(|b| (*b).number != ball.number)
+                .map(|b| *b)
+                .collect::<Vec<Ball>>();
+
+            Pool::move_ball(ball);
+            Pool::impact_against_wall(ball);
+            Pool::impact_against_other_balls(ball, all_except_self.as_slice());
+        }
+    }
+
+    pub fn move_ball(ball: &mut Ball) {
+        if !ball.is_stopped() {
+            ball.position.x += ball.speed.x;
+            ball.position.y += ball.speed.y;
+            println!("ball is at at {:?}", ball.position);
+            if ball.speed.magnitude().abs() <= MIN_SPEED {
+                ball.speed.x = 0.0;
+                ball.speed.y = 0.0;
             } else {
-                self.cueball.speed = self.cueball.speed.multiply(DECELERATION);
-            }
-
-            if self.cueball.position.x <= 0.0 {
-                self.cueball.position.x = 0.0;
-                self.cueball.speed.x *= -1.0;
-            }
-
-            if self.cueball.position.x >= 1.0 {
-                self.cueball.position.x = 1.0;
-                self.cueball.speed.x *= -1.0;
-            }
-
-            if self.cueball.position.y <= 0.0 {
-                self.cueball.position.y = 0.0;
-                self.cueball.speed.y *= -1.0;
-            }
-
-            //only half of the space is usable
-            if self.cueball.position.y >= 0.5 {
-                self.cueball.position.y = 0.5;
-                self.cueball.speed.y *= -1.0;
-            }
-
-            if self.cueball.position.y <= 0.0 || self.cueball.position.y >= 0.5 ||
-                self.cueball.position.x <= 0.0 || self.cueball.position.x >= 1.0 {
-                self.cueball.speed = self.cueball.speed.multiply(DECELERATION_IMPACT);
+                ball.speed = ball.speed.multiply(DECELERATION);
             }
         }
     }
 
+    pub fn impact_against_wall(ball: &mut Ball) {
+        let mut impact_happened = false;
+        let radius = ball.radius / 2.0;
+        if ball.position.x - radius <= 0.0 {
+            println!("impact happened at {:?}", ball.position);
+            ball.position.x = radius;
+            ball.speed.x *= -1.0;
+            impact_happened = true;
+        }
+        if ball.position.x + radius >= 1.0 {
+            println!("impact happened at {:?}", ball.position);
+            ball.position.x = 1.0 - radius;
+            ball.speed.x *= -1.0;
+            impact_happened = true;
+        }
+        if ball.position.y - radius <= 0.0 {
+            println!("impact happened at {:?}", ball.position);
+            ball.position.y = radius;
+            ball.speed.y *= -1.0;
+            impact_happened = true;
+        }
+        if ball.position.y + radius >= 0.5 {
+            println!("impact happened at {:?}", ball.position);
+            ball.position.y = 0.5 - radius;
+            ball.speed.y *= -1.0;
+            impact_happened = true;
+        }
+        if impact_happened {
+            ball.speed = ball.speed.multiply(DECELERATION_IMPACT);
+        }
+    }
+
+    pub fn impact_against_other_balls(ball: &mut Ball, other_balls: &[Ball]) {
+
+    }
     pub fn mouse_table_position(&self) -> Point2D {
         let mouse_pos_relative = ScreenPoint2D {
             x: self.mouse_pos.x - self.play_area.origin.x,
@@ -83,6 +113,7 @@ impl Pool {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Ball {
     pub position: Point2D,
     pub speed: Vector2D,

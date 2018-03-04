@@ -2,7 +2,7 @@ use complex::*;
 use geometry::*;
 
 /// A type that represents a space between (0,0) and (1,1)
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Point2D {
     pub x: f64,
     pub y: f64
