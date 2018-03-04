@@ -36,6 +36,6 @@ impl ScreenRectangle {
     }
 
     pub fn aspect_for_circles(&self) -> f64 {
-        self.width / 2.0
+        self.width
     }
 }
