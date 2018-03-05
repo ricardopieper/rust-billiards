@@ -51,6 +51,22 @@ impl Point2D {
     pub fn is_zero(&self) -> bool {
         self.x() == 0.0 && self.y() == 0.0
     }
+
+    pub fn minus(&self, other: &Vector2D) -> Vector2D {
+        Vector2D::new(self.x - other.x, self.y - other.y)
+    }
+
+    pub fn plus(&self, other: &Vector2D) -> Vector2D {
+        Vector2D::new(self.x + other.x, self.y + other.y)
+    }
+
+    pub fn perpendicular_right(&self) -> Vector2D {
+        Vector2D::new(self.y * -1.0, self.x)
+    }
+
+    pub fn perpendicular_left(&self) -> Vector2D {
+        Vector2D::new(self.y, self.x * -1.0)
+    }
 }
 
 impl Complex for Point2D {

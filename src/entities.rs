@@ -2,6 +2,8 @@ use complex::*;
 use ui::*;
 use std::time::*;
 use geometry::*;
+use physics::impact_event::*;
+
 
 pub const MIN_SPEED: f64 = 0.00018;
 pub const DECELERATION: f64 = 0.992;
@@ -18,14 +20,11 @@ pub struct Pool {
 
 impl Pool {
     pub fn update(&mut self) {
-        println!("cueball position: {:?}", self.cueball.position);
-        println!("cueball stopped: {:?}", self.cueball.is_stopped());
-
         let balls_impact_check = self.balls.clone();
 
         Pool::move_ball(&mut self.cueball);
         Pool::impact_against_wall(&mut self.cueball);
-        Pool::impact_against_other_balls(&mut self.cueball, balls_impact_check.as_slice());
+        self.check_cueball_impact();
 
         for ball in &mut self.balls {
             let all_except_self = balls_impact_check.iter()
@@ -35,7 +34,7 @@ impl Pool {
 
             Pool::move_ball(ball);
             Pool::impact_against_wall(ball);
-            Pool::impact_against_other_balls(ball, all_except_self.as_slice());
+            //  self.impact_against_other_balls(ball, all_except_self.as_slice());
         }
     }
 
@@ -83,7 +82,58 @@ impl Pool {
         }
     }
 
-    pub fn impact_against_other_balls(ball: &mut Ball, other_balls: &[Ball]) {}
+    pub fn check_cueball_impact(&mut self) {
+        let cueball = self.cueball.clone();
+
+        let impacts = self.balls.as_slice()
+            .iter()
+            .filter(|b| Pool::balls_overlap(&cueball, *b))
+            .map(|b| ImpactEvent::new(&cueball, b))
+            .collect::<Vec<ImpactEvent>>();
+
+        for impact in impacts {
+            println!("{:?}", impact);
+            let (ball_a, ball_b) = self.get_impact_balls(&impact);
+            ball_a.speed = ball_a.speed.plus(&impact.ball_a_vector.divide(SPEED_RATIO));
+            ball_b.speed = ball_b.speed.plus(&impact.ball_b_vector.divide(SPEED_RATIO));
+        }
+    }
+
+    pub fn get_impact_balls(&mut self, impact: &ImpactEvent) -> (&mut Ball, &mut Ball) {
+        let index_a_opt = self.balls.iter()
+            .position(|b| b.number == impact.ball_a);
+
+        let index_b_opt = self.balls.iter()
+            .position(|b| b.number == impact.ball_b);
+
+        match index_a_opt {
+            Some(index_a) => match index_b_opt {
+                Some(index_b) => self.get_impact_balls_index(index_a, index_b),
+                None => (self.balls.get_mut(index_a).unwrap(), &mut self.cueball)
+            },
+            None => match index_b_opt {
+                Some(index_b) => {
+                    //  println!("getting impact between cueball and ball at {:?}", index_b);
+                    (&mut self.cueball, self.balls.get_mut(index_b).unwrap())
+                }
+                None => panic!("nothing was found")
+            }
+        }
+    }
+
+    pub fn get_impact_balls_index(&mut self, index_a: usize, index_b: usize) -> (&mut Ball, &mut Ball) {
+        let (first, second) = self.balls.split_at_mut(index_a + 1);
+        let ball_a: &mut Ball = first.last_mut().unwrap();
+        let ball_b: &mut Ball = second.get_mut(index_b - index_a).unwrap();
+        (ball_a, ball_b)
+    }
+
+    pub fn balls_overlap(ball_a: &Ball, ball_b: &Ball) -> bool {
+        let distance_between_centers = ball_a.position.distance_between(&ball_b.position);
+        let sum_of_radius = ball_a.radius + ball_b.radius;
+        sum_of_radius >= distance_between_centers
+    }
+
     pub fn mouse_table_position(&self) -> Point2D {
         let mouse_pos_relative = ScreenPoint2D {
             x: self.mouse_pos.x - self.play_area.origin.x,
@@ -110,7 +160,7 @@ impl Pool {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Debug, Clone)]
 pub struct Ball {
     pub position: Point2D,
     pub speed: Vector2D,

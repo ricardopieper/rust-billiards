@@ -4,6 +4,7 @@ mod utils;
 mod complex;
 mod ui;
 mod geometry;
+mod physics;
 
 extern crate piston;
 extern crate graphics;
@@ -21,6 +22,7 @@ use entities::*;
 use rendering::pool::*;
 use complex::*;
 use geometry::*;
+use physics::*;
 
 fn main() {
     let opengl = OpenGL::V3_2;
@@ -36,12 +38,12 @@ fn main() {
 
     let ball = Ball {
         number: 1,
-        position: Point2D::new(0.25, 0.027),
-        speed: Point2D::new(0.1, 0.0),
+        position: Point2D::new(0.35, 0.25),
+        speed: Point2D::new(0.0, 0.0),
         radius: 0.025
     };
 
-    let ball2 = Ball {
+   /* let ball2 = Ball {
         number: 1,
         position: Point2D::new(0.25, 0.075),
         speed: Point2D::new(0.1, 0.0),
@@ -103,12 +105,12 @@ fn main() {
         speed: Point2D::new(0.1, 0.0),
         radius: 0.025
     };
-
+*/
     let cueball = Ball {
         number: 0,
         position: Point2D::new(0.5, 0.25),
         speed: Vector2D::new(0.0, 0.0),
-        radius: 0.245
+        radius: 0.025
     };
 
     let pocket_tl = Pocket { position: Point2D::new(0.0, 0.0), radius: 0.04 };
@@ -128,7 +130,7 @@ fn main() {
             pocket_bm,
             pocket_br
         ],
-        balls: vec![ball, ball2, ball3, ball4, ball5, ball6, ball7, ball8, ball9, ball10],
+        balls: vec![ball /*, ball2, ball3, ball4, ball5, ball6, ball7, ball8, ball9, ball10*/],
         mouse_pos: ScreenPoint2D::new(354.0, 408.0),
         cueball,
         play_area: ScreenRectangle {
@@ -146,6 +148,8 @@ fn main() {
     let mut gl = GlGraphics::new(opengl);
 
     let mut events = Events::new(EventSettings::new());
+    events.set_ups(60);
+
     while let Some(e) = events.next(&mut window) {
         if let Some(u) = e.update_args() {
             pool.update();
