@@ -20,7 +20,6 @@ pub struct Pool {
 
 impl Pool {
     pub fn update(&mut self) {
-        let balls_impact_check = self.balls.clone();
 
         Pool::move_ball(&mut self.cueball);
         Pool::impact_against_wall(&mut self.cueball);
