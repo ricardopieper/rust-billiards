@@ -15,7 +15,7 @@ pub fn render(pool: &mut Pool, args: &RenderArgs, gl: &mut GlGraphics) {
         render_pockets(&pool, &c, gl);
         render_balls(&pool, &c, gl);
         render_cueball(&pool, &c, gl);
-        if pool.cueball.is_stopped() {
+        if pool.ball_positions.cueball.is_stopped() {
             render_cue(&pool, &c, gl);
         }
     });

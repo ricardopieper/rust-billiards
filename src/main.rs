@@ -130,9 +130,11 @@ fn main() {
             pocket_bm,
             pocket_br
         ],
-        balls: vec![ball /*, ball2, ball3, ball4, ball5, ball6, ball7, ball8, ball9, ball10*/],
+        ball_positions: BallPositions {
+            balls: vec![ball /*, ball2, ball3, ball4, ball5, ball6, ball7, ball8, ball9, ball10*/],
+            cueball
+        },
         mouse_pos: ScreenPoint2D::new(354.0, 408.0),
-        cueball,
         play_area: ScreenRectangle {
             origin: ScreenPoint2D::new(0.0, 0.0),
             height: 0.0,

@@ -36,7 +36,6 @@ impl Point2D {
     /// Normalizes a vector/point to 1
     pub fn normalize(&self) -> Vector2D {
         let m = self.magnitude();
-
         Vector2D::new(self.x / m, self.y / m)
     }
 

@@ -3,125 +3,224 @@ use ui::*;
 use std::time::*;
 use geometry::*;
 use physics::impact_event::*;
+use std::cell::Cell;
 
-
-pub const MIN_SPEED: f64 = 0.00018;
+pub const MIN_SPEED: f64 = 0.00017;
 pub const DECELERATION: f64 = 0.992;
 pub const DECELERATION_IMPACT_WALL: f64 = 0.95;
 pub const SPEED_RATIO: f64 = 30.0;
 
 pub struct Pool {
-    pub cueball: Ball,
-    pub balls: Vec<Ball>,
+    pub ball_positions: BallPositions,
     pub pockets: Vec<Pocket>,
     pub mouse_pos: ScreenPoint2D,
     pub play_area: ScreenRectangle
 }
 
-impl Pool {
-    pub fn update(&mut self) {
+pub struct BallPositions {
+    pub cueball: Ball,
+    pub balls: Vec<Ball>
+}
 
-        Pool::move_ball(&mut self.cueball);
-        Pool::impact_against_wall(&mut self.cueball);
-        self.check_cueball_impact();
+pub enum WallImpact {
+    None,
+    Top,
+    Left,
+    Right,
+    Bottom
+}
 
-        for ball in &mut self.balls {
-            let all_except_self = balls_impact_check.iter()
-                .filter(|b| (*b).number != ball.number)
-                .map(|b| *b)
-                .collect::<Vec<Ball>>();
-
-            Pool::move_ball(ball);
-            Pool::impact_against_wall(ball);
-            //  self.impact_against_other_balls(ball, all_except_self.as_slice());
+impl BallPositions {
+    pub fn tick(&self) -> BallPositions {
+        BallPositions {
+            cueball: BallPositions::calculate_ball(&self.cueball),
+            balls: BallPositions::calculate_every_ball(&self.balls)
         }
     }
 
-    pub fn move_ball(ball: &mut Ball) {
-        if !ball.is_stopped() {
-            ball.position.x += ball.speed.x;
-            ball.position.y += ball.speed.y;
-            if ball.speed.magnitude().abs() <= MIN_SPEED {
-                ball.speed.x = 0.0;
-                ball.speed.y = 0.0;
-            } else {
-                ball.speed = ball.speed.multiply(DECELERATION);
+    pub fn calculate_new_position(position: &Vector2D, speed: &Vector2D) -> Vector2D {
+        if !speed.is_zero() {
+            Vector2D {
+                x: position.x + speed.x,
+                y: position.y + speed.y
             }
+        } else {
+            *position
         }
     }
 
-    pub fn impact_against_wall(ball: &mut Ball) {
+    pub fn calculate_new_speed(speed: &Vector2D) -> Vector2D {
+        if speed.magnitude().abs() <= MIN_SPEED {
+            Vector2D::new(0.0, 0.0)
+        } else {
+            speed.multiply(DECELERATION)
+        }
+    }
+
+    pub fn calculate_ball(ball: &Ball) -> Ball {
+        let mut new_ball = Ball {
+            position: BallPositions::calculate_new_position(&ball.position, &ball.speed),
+            speed: BallPositions::calculate_new_speed(&ball.speed),
+            number: ball.number,
+            radius: ball.radius
+        };
+
+        let impact = BallPositions::check_impact_wall(&new_ball);
+
+        match impact {
+            WallImpact::Left | WallImpact::Right => {
+                new_ball.speed.x *= -1.0;
+            }
+            WallImpact::Top | WallImpact::Bottom => {
+                new_ball.speed.y *= -1.0;
+            }
+            WallImpact::None => {}
+        };
+
+        let radius = new_ball.radius;
+
+        match impact {
+            WallImpact::Left => {
+                new_ball.position.x = radius;
+            }
+            WallImpact::Right => {
+                new_ball.position.x = 1.0 - radius;
+            }
+            WallImpact::Top => {
+                new_ball.position.y = radius;
+            }
+            WallImpact::Bottom => {
+                new_ball.position.y = 0.5 - radius;
+            }
+            WallImpact::None => {}
+        };
+        new_ball
+    }
+
+    pub fn calculate_every_ball(balls: &[Ball]) -> Vec<Ball> {
+        balls.iter().map(|b|
+            BallPositions::calculate_ball(b)
+        ).collect::<Vec<Ball>>()
+    }
+
+    pub fn check_impact_wall(ball: &Ball) -> WallImpact {
         if !ball.is_stopped() {
-            let mut impact_happened = false;
             let radius = ball.radius;
             if ball.position.x - radius <= 0.0 {
-                ball.position.x = radius;
-                ball.speed.x *= -1.0;
-                impact_happened = true;
+                WallImpact::Left
+            } else if ball.position.x + radius >= 1.0 {
+                WallImpact::Right
+            } else if ball.position.y - radius <= 0.0 {
+                WallImpact::Top
+            } else if ball.position.y + radius >= 0.5 {
+                WallImpact::Bottom
+            } else {
+                WallImpact::None
             }
-            if ball.position.x + radius >= 1.0 {
-                ball.position.x = 1.0 - radius;
-                ball.speed.x *= -1.0;
-                impact_happened = true;
-            }
-            if ball.position.y - radius <= 0.0 {
-                ball.position.y = radius;
-                ball.speed.y *= -1.0;
-                impact_happened = true;
-            }
-            if ball.position.y + radius >= 0.5 {
-                ball.position.y = 0.5 - radius;
-                ball.speed.y *= -1.0;
-                impact_happened = true;
-            }
-
-            if impact_happened {
-                ball.speed = ball.speed.multiply(DECELERATION_IMPACT_WALL);
-            }
+        } else {
+            WallImpact::None
         }
+    }
+
+    fn balls_overlap(ball_a: &Ball, ball_b: &Ball) -> bool {
+        let distance_between_centers = ball_a.position.distance_between(&ball_b.position);
+        let sum_of_radius = ball_a.radius + ball_b.radius;
+        sum_of_radius >= distance_between_centers
+    }
+}
+
+impl Pool {
+    pub fn update(&mut self) {
+        let mut current_pos = self.ball_positions.tick();
+        self.ball_positions = current_pos;
+        self.check_cueball_impact();
     }
 
     pub fn check_cueball_impact(&mut self) {
-        let cueball = self.cueball.clone();
+        let cueball = self.ball_positions.cueball.clone();
 
-        let impacts = self.balls.as_slice()
+        let impacts = self.ball_positions.balls.as_slice()
             .iter()
             .filter(|b| Pool::balls_overlap(&cueball, *b))
             .map(|b| ImpactEvent::new(&cueball, b))
             .collect::<Vec<ImpactEvent>>();
 
         for impact in impacts {
-            println!("{:?}", impact);
+            println!("impact happened: {:?}", impact);
             let (ball_a, ball_b) = self.get_impact_balls(&impact);
-            ball_a.speed = ball_a.speed.plus(&impact.ball_a_vector.divide(SPEED_RATIO));
-            ball_b.speed = ball_b.speed.plus(&impact.ball_b_vector.divide(SPEED_RATIO));
+
+            let new_vec2d_a = Pool::get_new_speed_a(&impact,
+                                                    ball_a, ball_b);
+
+            let new_vec2d_b = Pool::get_new_speed_b(&impact,
+                                                    ball_a, ball_b);
+
+            ball_a.speed = new_vec2d_a;
+            ball_b.speed = new_vec2d_b;
+
+            Pool::move_ball(ball_a);
+            Pool::move_ball(ball_b);
+            println!("ball b new position: {:?}", ball_b);
+            println!("ball a new position: {:?}", ball_a);
         }
     }
 
+    pub fn get_new_speed_a(impact: &ImpactEvent,
+                           ball_a: &Ball, ball_b: &Ball) -> Vector2D {
+        let with_lost_energy = &ball_a.speed.minus(
+            &ball_a.speed.multiply(impact.energy_transfer_a_to_b)
+        );
+
+        let gain_magnitude = ball_b.speed.multiply(impact.energy_transfer_b_to_a)
+            .magnitude();
+
+        let vector_gain = &impact.ball_a_heading.multiply(
+            gain_magnitude);
+
+        let final_result = with_lost_energy.plus(vector_gain);
+
+        final_result
+    }
+
+    pub fn get_new_speed_b(impact: &ImpactEvent,
+                           ball_a: &Ball, ball_b: &Ball) -> Vector2D {
+        let with_lost_energy = &ball_b.speed.minus(
+            &ball_b.speed.multiply(impact.energy_transfer_b_to_a)
+        );
+
+
+        let gain_magnitude = ball_a.speed.multiply(impact.energy_transfer_a_to_b)
+            .magnitude();
+        let vector_gain = &impact.ball_b_heading.multiply(
+            gain_magnitude);
+
+        let final_result = with_lost_energy.plus(vector_gain);
+
+
+        final_result
+    }
+
     pub fn get_impact_balls(&mut self, impact: &ImpactEvent) -> (&mut Ball, &mut Ball) {
-        let index_a_opt = self.balls.iter()
+        let index_a_opt = self.ball_positions.balls.iter()
             .position(|b| b.number == impact.ball_a);
 
-        let index_b_opt = self.balls.iter()
+        let index_b_opt = self.ball_positions.balls.iter()
             .position(|b| b.number == impact.ball_b);
 
         match index_a_opt {
             Some(index_a) => match index_b_opt {
                 Some(index_b) => self.get_impact_balls_index(index_a, index_b),
-                None => (self.balls.get_mut(index_a).unwrap(), &mut self.cueball)
+                None => (self.ball_positions.balls.get_mut(index_a).unwrap(), &mut self.ball_positions.cueball)
             },
             None => match index_b_opt {
-                Some(index_b) => {
-                    //  println!("getting impact between cueball and ball at {:?}", index_b);
-                    (&mut self.cueball, self.balls.get_mut(index_b).unwrap())
-                }
+                Some(index_b) => (&mut self.ball_positions.cueball, self.ball_positions.balls.get_mut(index_b).unwrap()),
                 None => panic!("nothing was found")
             }
         }
     }
 
     pub fn get_impact_balls_index(&mut self, index_a: usize, index_b: usize) -> (&mut Ball, &mut Ball) {
-        let (first, second) = self.balls.split_at_mut(index_a + 1);
+        let (first, second) = self.ball_positions.balls.split_at_mut(index_a + 1);
         let ball_a: &mut Ball = first.last_mut().unwrap();
         let ball_b: &mut Ball = second.get_mut(index_b - index_a).unwrap();
         (ball_a, ball_b)
@@ -149,13 +248,15 @@ impl Pool {
     }
 
     pub fn stun_shot(&mut self) {
-        let ball_pos = &self.cueball.position;
-
+        let ball_pos = &self.ball_positions.cueball.position;
         let mouse_pos_2d = self.mouse_table_position();
-
         let vector = CueLine::get_shot_vector(&mouse_pos_2d, ball_pos);
+        self.ball_positions.cueball.speed = vector.divide(SPEED_RATIO);
+    }
 
-        self.cueball.speed = vector.divide(SPEED_RATIO);
+    pub fn move_ball(ball: &mut Ball) {
+        ball.position.x += ball.speed.x;
+        ball.position.y += ball.speed.y;
     }
 }
 
